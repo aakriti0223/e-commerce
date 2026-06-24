@@ -1,0 +1,142 @@
+// import { store } from "@/store";
+// import axios from "axios";
+// import { authService } from "./auth.service";
+// import { clearAuth, setAccessToken } from "@/store/slices/authSlice";
+
+// export const apiClient = axios.create({
+//     baseURL: process.env.NEXT_PUBLIC_API_URL,
+//     headers: {
+//         "Content-Type": "application/json",
+//     },
+//     timeout: 10000,
+// });
+
+// apiClient.interceptors.request.use(
+//     (config)=>{
+//         const state = store.getState();
+//         const token = state.auth.accessToken
+
+//         if(token){
+//             config.headers.Authorization = `Bearer ${token}`;
+//         }
+//         return config;
+//     },
+//     (error) => {
+//         return Promise.reject(error);
+//     },
+// );
+
+// apiClient.interceptors.response.use(
+//     (response)  => response,
+//     async (error) => {
+//         const originalRequest = error.config;
+//         if(error.response?.status === 401 && !originalRequest._retry){
+//             originalRequest._retry = true;
+
+//             const state = store.getState();
+//             const refreshToken = state.auth.refreshToken;
+
+//             if(refreshToken){
+//                 const newAccessToken = await authService.refreshToken(refreshToken);
+
+//             if(newAccessToken){
+//                 store.dispatch(setAccessToken(newAccessToken));
+//                 originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+//                 return apiClient(originalRequest);
+//             }
+//             }
+//             store.dispatch(clearAuth());
+//             if(typeof window !== "undefined"){
+//                 window.location.href = "/auth/login";
+//             }
+//         }
+//         return Promise.reject(error);
+//     }
+// )
+
+import { store } from '@/store';
+import axios from 'axios';
+import { authService } from './auth.service';
+import { clearAuth, setAccessToken } from '@/store/slices/authSlice';
+
+export const apiClient = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  timeout: 10000,
+});
+
+apiClient.interceptors.request.use(
+  (config) => {
+    const state = store.getState();
+
+    const reduxToken = state.auth.accessToken;
+
+    const localStorageToken =
+      typeof window !== 'undefined'
+        ? localStorage.getItem('accessToken') || localStorage.getItem('token')
+        : null;
+
+    const token = reduxToken || localStorageToken;
+
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      const state = store.getState();
+
+      const reduxRefreshToken = state.auth.refreshToken;
+
+      const localStorageRefreshToken =
+        typeof window !== 'undefined'
+          ? localStorage.getItem('refreshToken')
+          : null;
+
+      const refreshToken = reduxRefreshToken || localStorageRefreshToken;
+
+      if (refreshToken) {
+        const newAccessToken = await authService.refreshToken(refreshToken);
+
+        if (newAccessToken) {
+          store.dispatch(setAccessToken(newAccessToken));
+
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('accessToken', newAccessToken);
+            localStorage.setItem('token', newAccessToken);
+          }
+
+          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+          return apiClient(originalRequest);
+        }
+      }
+
+      store.dispatch(clearAuth());
+
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
+
+        window.location.href = '/auth/login';
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);

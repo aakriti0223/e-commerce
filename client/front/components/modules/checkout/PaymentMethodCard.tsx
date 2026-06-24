@@ -1,0 +1,130 @@
+// 'use client';
+
+// import styles from './payment-method-card.module.scss'
+// import {motion} from "framer-motion"
+
+// export default function PaymentMethodCard({
+//     method,
+//     selectedMethod,
+//     onSelect,
+//     title,
+//     description,
+//     children,
+//     icon,
+    
+// } : {
+//     description?: string;
+//     title: string;
+//     method: string;
+//     selectedMethod: string;
+//     onSelect: (method: string) => void;
+//     children: React.ReactNode;
+//     icon: React.ReactNode;
+// }){
+
+//     const isSelected = selectedMethod === method;
+
+//     return (
+//         <div 
+//         className={`styles.card ${isSelected ? styles.cardSelected: ""}`}
+//             onClick = {() => onSelect(method)}
+//         >
+//             <div className={styles.cardHeader}>
+//                 <div className={styles.radio}>
+//                     {isSelected && <div className={styles.radioChecked} />}
+
+//                 </div>
+//                 <div className={styles.icon}>{icon}</div>
+//                 <div className={styles.info}>
+// <h4 className={styles.title}>{title}</h4>
+// {description && <p className={styles.description}>{description}</p>}
+//                 </div>
+//                 {method === "stripe" && (
+//                     <div className={styles.cardLogos}>
+// <div className={styles.visa}></div>
+// <div className={styles.mastercard}></div>
+// <div className={styles.amex}></div>
+//                     </div>
+//                 )}
+
+//             </div>
+
+//             {isSelected && children && (
+//                 <motion.div 
+//                 initial= {{ opacity: 0, height: 0}}
+//                 animate = {{ opacity: 1, height: "auto"}}
+//                 transition={{duration: 0.3}}
+//                 className={styles.cardContent}
+//                 >
+//                     {children}
+
+//                 </motion.div>
+//             )}
+//         </div>
+//     );
+// };
+
+'use client';
+
+import { motion } from 'framer-motion';
+import styles from './payment-method-card.module.scss';
+
+export default function PaymentMethodCard({
+  method,
+  selectedMethod,
+  onSelect,
+  title,
+  description,
+  children,
+  icon,
+}: {
+  method: string;
+  selectedMethod: string;
+  onSelect: (method: string) => void;
+  title: string;
+  description?: string;
+  children?: React.ReactNode;
+  icon: React.ReactNode;
+}) {
+  const isSelected = selectedMethod === method;
+
+  return (
+    <div
+      className={`${styles.card} ${isSelected ? styles.cardSelected : ''}`}
+      onClick={() => onSelect(method)}
+    >
+      <div className={styles.cardHeader}>
+        <div className={styles.radio}>
+          {isSelected && <div className={styles.radioChecked} />}
+        </div>
+
+        <div className={styles.icon}>{icon}</div>
+
+        <div className={styles.info}>
+          <h4 className={styles.title}>{title}</h4>
+          {description && <p className={styles.description}>{description}</p>}
+        </div>
+
+        {method === 'stripe' && (
+          <div className={styles.cardLogos}>
+            <div className={styles.visa}></div>
+            <div className={styles.mastercard}></div>
+            <div className={styles.amex}></div>
+          </div>
+        )}
+      </div>
+
+      {isSelected && children && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          transition={{ duration: 0.3 }}
+          className={styles.cardContent}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {children}
+        </motion.div>
+      )}
+    </div>
+  );
+}
