@@ -46,7 +46,7 @@ import { UpdateOrderDto } from './dto/update-order.dto';
 @ApiBearerAuth('JWT-auth')
 @Controller('orders')
 @UseGuards(JwtAuthGuard, RolesGuard)
-export class OrderController {
+export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   // Create orders
