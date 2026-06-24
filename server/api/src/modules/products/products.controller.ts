@@ -159,7 +159,8 @@ export class ProductsController {
       properties: {
         quantity: {
           type: 'number',
-          description: 'Stock adjustment (Positive to add, negative to subtract)',
+          description:
+            'Stock adjustment (Positive to add, negative to subtract)',
           example: 10,
         },
       },

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserResponseDto } from '../auth/dto/user-response.dto';
 import { UpdateUserDto } from '../auth/dto/update-user.dto';
@@ -114,10 +118,7 @@ export class UsersService {
       );
     }
 
-    const hashedNewPassword = await bcrypt.hash(
-      newPassword,
-      this.SALT_ROUNDS,
-    );
+    const hashedNewPassword = await bcrypt.hash(newPassword, this.SALT_ROUNDS);
 
     await this.prisma.user.update({
       where: { id: userId },

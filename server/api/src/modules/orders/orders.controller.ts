@@ -119,10 +119,7 @@ export class OrderController {
     description: 'List of user orders',
     type: PaginatedOrderResponseDto,
   })
-  async findAll(
-    @Query() query: QueryOrderDto,
-    @GetUser('id') userId: string,
-  ) {
+  async findAll(@Query() query: QueryOrderDto, @GetUser('id') userId: string) {
     return await this.ordersService.findAll(userId, query);
   }
 
@@ -168,10 +165,7 @@ export class OrderController {
   @ApiNotFoundResponse({
     description: 'order not found',
   })
-  async findOne(
-    @Param('id') id: string,
-    @GetUser('id') userId: string,
-  ) {
+  async findOne(@Param('id') id: string, @GetUser('id') userId: string) {
     return await this.ordersService.findOne(id, userId);
   }
 
@@ -199,10 +193,7 @@ export class OrderController {
   @ApiForbiddenResponse({
     description: 'Admin access required',
   })
-  async updateAdmin(
-    @Param('id') id: string,
-    @Body() dto: UpdateOrderDto,
-  ) {
+  async updateAdmin(@Param('id') id: string, @Body() dto: UpdateOrderDto) {
     return await this.ordersService.update(id, dto);
   }
 
@@ -270,10 +261,7 @@ export class OrderController {
   @ApiNotFoundResponse({
     description: 'Order not found',
   })
-  async cancel(
-    @Param('id') id: string,
-    @GetUser('id') userId: string,
-  ) {
+  async cancel(@Param('id') id: string, @GetUser('id') userId: string) {
     return await this.ordersService.cancel(id, userId);
   }
 }

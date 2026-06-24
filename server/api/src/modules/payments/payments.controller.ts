@@ -66,10 +66,7 @@ export class PaymentsController {
     @Body() confirmPaymentDto: ConfirmPaymentDto,
     @GetUser('id') userId: string,
   ) {
-    return await this.paymentsService.confirmPayment(
-      userId,
-      confirmPaymentDto,
-    );
+    return await this.paymentsService.confirmPayment(userId, confirmPaymentDto);
   }
 
   @Get()
@@ -127,10 +124,7 @@ export class PaymentsController {
   @ApiNotFoundResponse({
     description: 'Payment not found',
   })
-  async findOne(
-    @Param('id') id: string,
-    @GetUser('id') userId: string,
-  ) {
+  async findOne(@Param('id') id: string, @GetUser('id') userId: string) {
     return await this.paymentsService.findOne(id, userId);
   }
 }

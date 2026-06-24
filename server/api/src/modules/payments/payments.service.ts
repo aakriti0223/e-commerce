@@ -43,13 +43,8 @@ export class PaymentsService {
       where: { orderId },
     });
 
-    if (
-      existingPayment &&
-      existingPayment.status === PaymentStatus.COMPLETED
-    ) {
-      throw new BadRequestException(
-        'payment already complted for this order',
-      );
+    if (existingPayment && existingPayment.status === PaymentStatus.COMPLETED) {
+      throw new BadRequestException('payment already complted for this order');
     }
 
     const paymentIntent = await this.stripe.paymentIntents.create({

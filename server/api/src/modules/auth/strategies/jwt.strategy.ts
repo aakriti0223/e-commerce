@@ -1,40 +1,40 @@
 // jwt strategy for auth requests
-import {PassportStrategy} from '@nestjs/passport';
+import { PassportStrategy } from '@nestjs/passport';
 import { ConfigService } from '@nestjs/config';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-    constructor(
-        private prisma: PrismaService,
-        private configService: ConfigService,
-    ){
-        super({
-            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-            ignoreExpiration: false,
-            secretOrKey: configService.get<string>('JWT_SECRET') ,
-        })
-    }
+  constructor(
+    private prisma: PrismaService,
+    private configService: ConfigService,
+  ) {
+    super({
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      ignoreExpiration: false,
+      secretOrKey: configService.get<string>('JWT_SECRET'),
+    });
+  }
 
-    // Validate the JWT payload and return the user object
-    async validate(payload: { sub: string; email: string}){
-        const user = await this.prisma.user.findUnique({
-            where: {id: payload.sub},
-            select: {
-                id: true,
-                email: true,
-                firstName: true,
-                lastName: true,
-                role: true,
-                createdAt: true,
-                updatedAt: true,
-                password: false, // Exclude password from the response
-            }
-        });
-        if (!user){
-            throw new UnauthorizedException('User not found');
-        }
-        return user;
+  // Validate the JWT payload and return the user object
+  async validate(payload: { sub: string; email: string }) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: payload.sub },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+        password: false, // Exclude password from the response
+      },
+    });
+    if (!user) {
+      throw new UnauthorizedException('User not found');
     }
+    return user;
+  }
 }

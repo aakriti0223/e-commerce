@@ -125,7 +125,10 @@ export class CartsService {
   }
 
   // Remove item from cart
-  async removeItem(userId: string, itemId: string): Promise<CartApiResponseDto> {
+  async removeItem(
+    userId: string,
+    itemId: string,
+  ): Promise<CartApiResponseDto> {
     const cart = await this.getOrCreateCart(userId);
 
     const item = await this.prisma.cartItem.findFirst({
@@ -163,9 +166,7 @@ export class CartsService {
     return this.wrap(updatedCart, 'Cart cleared successfully');
   }
 
-  private async getOrCreateCart(
-    userId: string,
-  ): Promise<
+  private async getOrCreateCart(userId: string): Promise<
     Cart & {
       cartItems: (CartItem & { product: Product })[];
     }

@@ -16,7 +16,9 @@ export class ProductsService {
   constructor(private prisma: PrismaService) {}
 
   // Create product
-  async create(createProductDto: CreateProductDto): Promise<ProductResponseDto> {
+  async create(
+    createProductDto: CreateProductDto,
+  ): Promise<ProductResponseDto> {
     const existingSku = await this.prisma.product.findUnique({
       where: { sku: createProductDto.sku },
     });
@@ -151,10 +153,7 @@ export class ProductsService {
   }
 
   // Update product stock
-  async updateStock(
-    id: string,
-    quantity: number,
-  ): Promise<ProductResponseDto> {
+  async updateStock(id: string, quantity: number): Promise<ProductResponseDto> {
     const product = await this.prisma.product.findUnique({
       where: { id },
     });
