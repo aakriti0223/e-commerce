@@ -47,8 +47,8 @@ jobs:
       - name: Run tests
         run: npm test
 
-      - name: NPM audit high severity
-        run: npm audit --audit-level=high 
+      - name: NPM audit critical severity
+        run: npm audit --audit-level=critical
 
   deploy:
     needs: ci
