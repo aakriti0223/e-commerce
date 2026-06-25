@@ -61,7 +61,9 @@ async function bootstrap() {
       },
       'JWT-refresh',
     )
-    .addServer('http://localhost:3001', 'Development server')
+    .addServer(`http://localhost:${process.env.PORT}`, 'Development server')
+    .addServer(`https://18-207-154-47.sslip.io`, 'Production server')
+    
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
