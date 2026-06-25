@@ -42,13 +42,13 @@ jobs:
         run: npx prisma generate
 
       - name: Lint
-        run: npm run lint
+        run: npm run lint 
 
       - name: Run tests
         run: npm test
 
       - name: NPM audit high severity
-        run: npm audit --audit-level=high
+        run: npm audit --audit-level=high 
 
   deploy:
     needs: ci
