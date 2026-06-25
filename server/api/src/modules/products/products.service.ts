@@ -4,7 +4,7 @@
 //   Injectable,
 //   NotFoundException,
 // } from '@nestjs/common';
-// import { Category, Prisma, Product } from '@prisma/client';
+// import { Category, Prisma, Product } from 'src/generated/prisma/client';
 // import { PrismaService } from 'src/prisma/prisma.service';
 // import { CreateProductDto } from './dto/create-product.dto';
 // import { ProductResponseDto } from './dto/product-response.dto';
@@ -222,7 +222,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma } from 'src/generated/prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ProductResponseDto } from './dto/product-response.dto';

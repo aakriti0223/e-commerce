@@ -3,7 +3,7 @@
 //   Injectable,
 //   NotFoundException,
 // } from '@nestjs/common';
-// import { Cart, CartItem, Product } from '@prisma/client';
+// import { Cart, CartItem, Product } from 'src/generated/prisma/client';
 // import { PrismaService } from 'src/prisma/prisma.service';
 // import { AddToCartDto } from './dto/add-to-cart.dto';
 // import { CartApiResponseDto, CartResponseDto } from './dto/cart-response.dto';
@@ -255,7 +255,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma } from 'src/generated/prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AddToCartDto } from './dto/add-to-cart.dto';
 import { CartApiResponseDto, CartResponseDto } from './dto/cart-response.dto';

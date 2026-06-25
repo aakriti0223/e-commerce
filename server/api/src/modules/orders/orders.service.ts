@@ -9,7 +9,7 @@
 //   OrderApiResponseDto,
 //   OrderResponseDto,
 // } from './dto/order-response.dto';
-// import { Order, OrderItem, OrderStatus, Product, User } from '@prisma/client';
+// import { Order, OrderItem, OrderStatus, Product, User } from 'src/generated/prisma/client';
 // import { QueryOrderDto } from './dto/query-order.dto';
 // import { UpdateOrderDto } from './dto/update-order.dto';
 
@@ -341,7 +341,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { OrderStatus, Prisma } from '@prisma/client';
+import { OrderStatus, Prisma } from 'src/generated/prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import {

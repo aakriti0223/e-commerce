@@ -1,4 +1,4 @@
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus } from 'src/generated/prisma/client';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 
 export class UpdateOrderDto {

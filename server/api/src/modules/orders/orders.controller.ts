@@ -24,7 +24,7 @@ import {
   ApiTags,
   ApiTooManyRequestsResponse,
 } from '@nestjs/swagger';
-import { Role } from '@prisma/client';
+import { Role } from 'src/generated/prisma/client';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { OrdersService } from './orders.service';
