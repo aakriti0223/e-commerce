@@ -3,7 +3,7 @@ import { ProductCart } from '@/types/product.types';
 import { apiClient } from './axios.config';
 
 export class CartService {
-  private static readonly ENDPOINT = '/cart';
+  private static readonly ENDPOINT = '/carts';
 
   static async mergeCart(localCart: ProductCart[]): Promise<CartResponse> {
     const response = await apiClient.post<CartResponse>(
