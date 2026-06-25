@@ -95,13 +95,27 @@ jobs:
             ECR_REGISTRY=$(echo "$ECR_REPOSITORY" | cut -d/ -f1)
             AWS_REGION="${{ secrets.AWS_REGION }}"
 
+            echo "Login to ECR..."
             aws ecr get-login-password --region "$AWS_REGION" | sudo docker login --username AWS --password-stdin "$ECR_REGISTRY"
 
+            echo "Check disk before cleanup..."
+            df -h
+
+            echo "Cleaning old unused Docker files..."
+            sudo docker system prune -af || true
+            sudo docker builder prune -af || true
+
+            echo "Check disk after cleanup..."
+            df -h
+
+            echo "Pull latest image..."
             sudo docker pull "$ECR_REPOSITORY:latest"
 
+            echo "Stop old container..."
             sudo docker stop aakriti-e-commerce || true
             sudo docker rm aakriti-e-commerce || true
 
+            echo "Read secrets from AWS Secrets Manager..."
             SECRETS_JSON=$(aws secretsmanager get-secret-value \
               --secret-id nestjs-prod-secrets \
               --region "$AWS_REGION" \
@@ -123,10 +137,15 @@ jobs:
             NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=$(echo "$SECRETS_JSON" | jq -r '.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY')
             STRIPE_SECRET_KEY=$(echo "$SECRETS_JSON" | jq -r '.STRIPE_SECRET_KEY')
 
+            echo "Run new container..."
             sudo docker run -d \
               --restart always \
               -p "$PORT:$PORT" \
               --name aakriti-e-commerce \
+              --log-driver=awslogs \
+              --log-opt awslogs-region=${{ secrets.AWS_REGION }} \
+              --log-opt awslogs-group=aakritinestapi-app \
+              --log-opt awslogs-stream=app-logs \
               -e DATABASE_USER="$DATABASE_USER" \
               -e DATABASE_PASSWORD="$DATABASE_PASSWORD" \
               -e DATABASE_NAME="$DATABASE_NAME" \
@@ -143,4 +162,9 @@ jobs:
               -e STRIPE_SECRET_KEY="$STRIPE_SECRET_KEY" \
               "$ECR_REPOSITORY:latest"
 
+            echo "Running containers:"
             sudo docker ps
+
+            echo "Final disk space:"
+            df -h
+
