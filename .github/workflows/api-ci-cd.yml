@@ -1,6 +1,5 @@
 name: CI/CD Nestjs to ECR then EC2
 
-# Run this workflow manually or whenever code is pushed to main branch
 on:
   workflow_dispatch:
   push:
@@ -8,137 +7,141 @@ on:
       - main
 
 jobs:
-  # First job: check code quality before deployment
   ci:
     runs-on: ubuntu-latest
 
-    steps:
-      # Download your GitHub repository code into GitHub runner
-      - name: Checkout code
-        uses: actions/checkout@v3
+    defaults:
+      run:
+        working-directory: ./server/api
 
-      # Install Node.js version required by your NestJS project
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      JWT_REFRESH_SECRET: ${{ secrets.JWT_REFRESH_SECRET }}
+      STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+      JWT_EXPIRES_IN: 86400
+      JWT_REFRESH_EXPIRES_IN: 7d
+      PORT: 3001
+      NODE_ENV: test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 24.16.0
+          cache: npm
+          cache-dependency-path: ./server/api/package-lock.json
 
-      # Install all backend dependencies from package-lock.json
       - name: Install dependencies
         run: npm ci
-        working-directory: ./server/api
 
-      # Generate Prisma client before build/test because NestJS uses Prisma types
       - name: Generate Prisma Client
         run: npx prisma generate
-        working-directory: ./server/api
 
-      # Check TypeScript/code formatting errors using ESLint
       - name: Lint
         run: npm run lint
-        working-directory: ./server/api
 
-      # Run unit tests before deployment
       - name: Run tests
         run: npm test
-        working-directory: ./server/api
 
-      # Check high severity security issues in npm packages
       - name: NPM audit high severity
         run: npm audit --audit-level=high
-        working-directory: ./server/api
 
-  # Second job: deploy only after CI job passes
   deploy:
     needs: ci
     runs-on: ubuntu-latest
 
-    # Required for GitHub OIDC authentication with AWS
     permissions:
       id-token: write
       contents: read
 
     steps:
-      # Download your GitHub repository code again for deploy job
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Login to AWS using OIDC instead of AWS access key and secret key
-      # This is safer because no permanent AWS secret keys are stored in GitHub
       - name: Configure AWS OIDC
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      # Login to ECR
       - name: Login to ECR
         run: |
-           aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | \
-           docker login --username AWS --password-stdin ${{ secrets.ECR_REPOSITORY }}
+          ECR_REGISTRY=$(echo "${{ secrets.ECR_REPOSITORY }}" | cut -d/ -f1)
+          aws ecr get-login-password --region "${{ secrets.AWS_REGION }}" | docker login --username AWS --password-stdin "$ECR_REGISTRY"
 
-      # Build Docker Image
       - name: Build Docker Image
         run: docker build --no-cache -t aakriti-e-commerce:latest ./server/api
 
+      - name: Tag Docker Image to ECR
+        run: docker tag aakriti-e-commerce:latest ${{ secrets.ECR_REPOSITORY }}:latest
 
-      # Tag Docker Image for ECR
-      - name: TagDocker Image to ECR
-        run: docker tag aakriti-e-commerce:latest ${{ secrets.ECR_REPOSITORY }}
-
-      # Push Docker image
       - name: Push Docker image to ECR
         run: docker push ${{ secrets.ECR_REPOSITORY }}:latest
 
-      # Deploy to EC2
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v0.1.7
         with:
-            host: ${{ secrets.EC2_HOST }}
-            username: ${{ secrets.EC2_USER }}
-            key: ${{ secrets.EC2_KEY }}
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            set -e
 
-            script: |
-              docker pull ${{ secrets.ECR_REPOSITORY }}:latest
+            ECR_REPOSITORY="${{ secrets.ECR_REPOSITORY }}"
+            ECR_REGISTRY=$(echo "$ECR_REPOSITORY" | cut -d/ -f1)
+            AWS_REGION="${{ secrets.AWS_REGION }}"
 
-              docker stop aakrit-e-commerce || true
-              docker rm aakriti-e-commerce || true
+            aws ecr get-login-password --region "$AWS_REGION" | sudo docker login --username AWS --password-stdin "$ECR_REGISTRY"
 
-              SECRETS_JSON=$(aws secretsmanager get-secret-value \
-                --secret-id nestjs-prod-secrets \
-                --query SecretString \
-                --output text)
+            sudo docker pull "$ECR_REPOSITORY:latest"
 
-                export DATABASE_USER=$(echo "$SECRETS_JSON" | jq -r '.DATABASE_USER')
-                export DATABASE_PASSWORD=$(echo "$SECRETS_JSON" | jq -r '.DATABASE_PASSWORD')
-                export DATABASE_NAME=$(echo "$SECRETS_JSON" | jq -r '.DATABASE_NAME')
-                export DATABASE_HOST=$(echo "$SECRETS_JSON" | jq -r '.DATABASE_HOST')
-                export DATABASE_PORT=$(echo "$SECRETS_JSON" | jq -r '.DATABASE_PORT')
-                export DATABASE_URL=$(echo "$SECRETS_JSON" | jq -r '.DATABASE_URL')
-                export PORT=$(echo "$SECRETS_JSON" | jq -r '.PORT')
-                export ALLOWED_ORIGINS=$(echo "$SECRETS_JSON" | jq -r '.ALLOWED_ORIGINS')
-                export JWT_SECRET=$(echo "$SECRETS_JSON" | jq -r '.JWT_SECRET')
-                export JWT_EXPIRES_IN=$(echo "$SECRETS_JSON" | jq -r '.JWT_EXPIRES_IN')
-                export JWT_REFRESH_SECRET=$(echo "$SECRETS_JSON" | jq -r '.JWT_REFRESH_SECRET')
-                export JWT_REFRESH_EXPIRES_IN=$(echo "$SECRETS_JSON" | jq -r '.JWT_REFRESH_EXPIRES_IN')
-                export NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=$(echo "$SECRETS_JSON" | jq -r '.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY')
-                export STRIPE_SECRET_KEY=$(echo "$SECRETS_JSON" | jq -r '.STRIPE_SECRET_KEY')
+            sudo docker stop aakriti-e-commerce || true
+            sudo docker rm aakriti-e-commerce || true
 
-                docker run-d \
-                  -p $PORT:$PORT \
-                  --name aakriti-e-commerce \
-                -e DATABASE_USER \
-                -e DATABASE_PASSWORD \
-                -e DATABASE_NAME \
-                -e DATABASE_HOST \
-                -e DATABASE_PORT \
-                -e DATABASE_URL \
-                -e PORT \
-                -e ALLOWED_ORIGINS \
-                -e JWT_SECRET \
-                -e JWT_EXPIRES_IN \
-                -e JWT_REFRESH_SECRET \
-                -e JWT_REFRESH_EXPIRES_IN \
-                -e NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY \
-                -e STRIPE_SECRET_KEY \
-                ${{ secrets.ECR_REPOSITORY }}:latest
+            SECRETS_JSON=$(aws secretsmanager get-secret-value \
+              --secret-id nestjs-prod-secrets \
+              --region "$AWS_REGION" \
+              --query SecretString \
+              --output text)
+
+            export DATABASE_USER=$(echo "$SECRETS_JSON" | jq -r '.DATABASE_USER')
+            export DATABASE_PASSWORD=$(echo "$SECRETS_JSON" | jq -r '.DATABASE_PASSWORD')
+            export DATABASE_NAME=$(echo "$SECRETS_JSON" | jq -r '.DATABASE_NAME')
+            export DATABASE_HOST=$(echo "$SECRETS_JSON" | jq -r '.DATABASE_HOST')
+            export DATABASE_PORT=$(echo "$SECRETS_JSON" | jq -r '.DATABASE_PORT')
+            export DATABASE_URL=$(echo "$SECRETS_JSON" | jq -r '.DATABASE_URL')
+            export PORT=$(echo "$SECRETS_JSON" | jq -r '.PORT')
+            export ALLOWED_ORIGINS=$(echo "$SECRETS_JSON" | jq -r '.ALLOWED_ORIGINS')
+            export JWT_SECRET=$(echo "$SECRETS_JSON" | jq -r '.JWT_SECRET')
+            export JWT_EXPIRES_IN=$(echo "$SECRETS_JSON" | jq -r '.JWT_EXPIRES_IN')
+            export JWT_REFRESH_SECRET=$(echo "$SECRETS_JSON" | jq -r '.JWT_REFRESH_SECRET')
+            export JWT_REFRESH_EXPIRES_IN=$(echo "$SECRETS_JSON" | jq -r '.JWT_REFRESH_EXPIRES_IN')
+            export NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=$(echo "$SECRETS_JSON" | jq -r '.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY')
+            export STRIPE_SECRET_KEY=$(echo "$SECRETS_JSON" | jq -r '.STRIPE_SECRET_KEY')
+
+            sudo docker run -d \
+              --restart always \
+              -p "$PORT:$PORT" \
+              --name aakriti-e-commerce \
+              -e DATABASE_USER \
+              -e DATABASE_PASSWORD \
+              -e DATABASE_NAME \
+              -e DATABASE_HOST \
+              -e DATABASE_PORT \
+              -e DATABASE_URL \
+              -e PORT \
+              -e ALLOWED_ORIGINS \
+              -e JWT_SECRET \
+              -e JWT_EXPIRES_IN \
+              -e JWT_REFRESH_SECRET \
+              -e JWT_REFRESH_EXPIRES_IN \
+              -e NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY \
+              -e STRIPE_SECRET_KEY \
+              "$ECR_REPOSITORY:latest"
+
+            sudo docker ps
+
