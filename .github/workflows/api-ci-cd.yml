@@ -42,7 +42,7 @@ jobs:
         run: npx prisma generate
 
       - name: Lint
-        run: npm run lint 
+        run: npm run lint
 
       - name: Run tests
         run: npm test
@@ -108,40 +108,39 @@ jobs:
               --query SecretString \
               --output text)
 
-            export DATABASE_USER=$(echo "$SECRETS_JSON" | jq -r '.DATABASE_USER')
-            export DATABASE_PASSWORD=$(echo "$SECRETS_JSON" | jq -r '.DATABASE_PASSWORD')
-            export DATABASE_NAME=$(echo "$SECRETS_JSON" | jq -r '.DATABASE_NAME')
-            export DATABASE_HOST=$(echo "$SECRETS_JSON" | jq -r '.DATABASE_HOST')
-            export DATABASE_PORT=$(echo "$SECRETS_JSON" | jq -r '.DATABASE_PORT')
-            export DATABASE_URL=$(echo "$SECRETS_JSON" | jq -r '.DATABASE_URL')
-            export PORT=$(echo "$SECRETS_JSON" | jq -r '.PORT')
-            export ALLOWED_ORIGINS=$(echo "$SECRETS_JSON" | jq -r '.ALLOWED_ORIGINS')
-            export JWT_SECRET=$(echo "$SECRETS_JSON" | jq -r '.JWT_SECRET')
-            export JWT_EXPIRES_IN=$(echo "$SECRETS_JSON" | jq -r '.JWT_EXPIRES_IN')
-            export JWT_REFRESH_SECRET=$(echo "$SECRETS_JSON" | jq -r '.JWT_REFRESH_SECRET')
-            export JWT_REFRESH_EXPIRES_IN=$(echo "$SECRETS_JSON" | jq -r '.JWT_REFRESH_EXPIRES_IN')
-            export NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=$(echo "$SECRETS_JSON" | jq -r '.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY')
-            export STRIPE_SECRET_KEY=$(echo "$SECRETS_JSON" | jq -r '.STRIPE_SECRET_KEY')
+            DATABASE_USER=$(echo "$SECRETS_JSON" | jq -r '.DATABASE_USER')
+            DATABASE_PASSWORD=$(echo "$SECRETS_JSON" | jq -r '.DATABASE_PASSWORD')
+            DATABASE_NAME=$(echo "$SECRETS_JSON" | jq -r '.DATABASE_NAME')
+            DATABASE_HOST=$(echo "$SECRETS_JSON" | jq -r '.DATABASE_HOST')
+            DATABASE_PORT=$(echo "$SECRETS_JSON" | jq -r '.DATABASE_PORT')
+            DATABASE_URL=$(echo "$SECRETS_JSON" | jq -r '.DATABASE_URL')
+            PORT=$(echo "$SECRETS_JSON" | jq -r '.PORT')
+            ALLOWED_ORIGINS=$(echo "$SECRETS_JSON" | jq -r '.ALLOWED_ORIGINS')
+            JWT_SECRET=$(echo "$SECRETS_JSON" | jq -r '.JWT_SECRET')
+            JWT_EXPIRES_IN=$(echo "$SECRETS_JSON" | jq -r '.JWT_EXPIRES_IN')
+            JWT_REFRESH_SECRET=$(echo "$SECRETS_JSON" | jq -r '.JWT_REFRESH_SECRET')
+            JWT_REFRESH_EXPIRES_IN=$(echo "$SECRETS_JSON" | jq -r '.JWT_REFRESH_EXPIRES_IN')
+            NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=$(echo "$SECRETS_JSON" | jq -r '.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY')
+            STRIPE_SECRET_KEY=$(echo "$SECRETS_JSON" | jq -r '.STRIPE_SECRET_KEY')
 
             sudo docker run -d \
               --restart always \
               -p "$PORT:$PORT" \
               --name aakriti-e-commerce \
-              -e DATABASE_USER \
-              -e DATABASE_PASSWORD \
-              -e DATABASE_NAME \
-              -e DATABASE_HOST \
-              -e DATABASE_PORT \
-              -e DATABASE_URL \
-              -e PORT \
-              -e ALLOWED_ORIGINS \
-              -e JWT_SECRET \
-              -e JWT_EXPIRES_IN \
-              -e JWT_REFRESH_SECRET \
-              -e JWT_REFRESH_EXPIRES_IN \
-              -e NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY \
-              -e STRIPE_SECRET_KEY \
+              -e DATABASE_USER="$DATABASE_USER" \
+              -e DATABASE_PASSWORD="$DATABASE_PASSWORD" \
+              -e DATABASE_NAME="$DATABASE_NAME" \
+              -e DATABASE_HOST="$DATABASE_HOST" \
+              -e DATABASE_PORT="$DATABASE_PORT" \
+              -e DATABASE_URL="$DATABASE_URL" \
+              -e PORT="$PORT" \
+              -e ALLOWED_ORIGINS="$ALLOWED_ORIGINS" \
+              -e JWT_SECRET="$JWT_SECRET" \
+              -e JWT_EXPIRES_IN="$JWT_EXPIRES_IN" \
+              -e JWT_REFRESH_SECRET="$JWT_REFRESH_SECRET" \
+              -e JWT_REFRESH_EXPIRES_IN="$JWT_REFRESH_EXPIRES_IN" \
+              -e NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="$NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY" \
+              -e STRIPE_SECRET_KEY="$STRIPE_SECRET_KEY" \
               "$ECR_REPOSITORY:latest"
 
             sudo docker ps
-
