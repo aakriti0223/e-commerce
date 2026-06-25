@@ -27,8 +27,8 @@ describe('AuthController', () => {
         {
           provide: PrismaService,
           useValue: {},
-        }
-      ]
+        },
+      ],
     }).compile();
 
     controller = module.get<AuthController>(AuthController);

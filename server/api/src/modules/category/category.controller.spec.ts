@@ -9,10 +9,10 @@ describe('CategoryController', () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [CategoryController],
       providers: [
-{
-provide: CategoryService,
-useValue: {},
-},
+        {
+          provide: CategoryService,
+          useValue: {},
+        },
       ],
     }).compile();
 

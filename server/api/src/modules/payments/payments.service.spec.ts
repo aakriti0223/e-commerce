@@ -10,7 +10,7 @@ describe('PaymentsService', () => {
         {
           provide: PaymentsService,
           useValue: {},
-        }
+        },
       ],
     }).compile();
 
