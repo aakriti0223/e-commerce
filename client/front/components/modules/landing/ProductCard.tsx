@@ -23,10 +23,12 @@ export default function ProductCard({ product }: { product: Product }) {
     currency: 'INR',
   }).format(Number(product.price));
 
-  const categoryName =
-    typeof product.category === 'string'
-      ? product.category
-      : product.category?.name || 'Product';
+  // const categoryName =
+  //   typeof product.category === 'string'
+  //     ? product.category
+  //     : product.category?.name || 'Product';
+
+  const categoryName = product.category || 'Product';
 
   const stock = Number(product.stock);
   const isOutOfStock = stock <= 0;
