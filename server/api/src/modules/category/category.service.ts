@@ -7,7 +7,7 @@
 // import { PrismaService } from 'src/prisma/prisma.service';
 // import { CreateCategoryDto } from './dto/create-category.dto';
 // import { CategoryResponseDto } from './dto/category-response.dto';
-// import { Category, Prisma } from 'src/generated/prisma/client';
+// import { Category, Prisma } from '@prisma/client';
 // import { UpdateCategoryDto } from './dto/update-category-dto';
 // import { QueryCategoryDto } from './dto/query-category.dto';
 // @Injectable()
@@ -237,7 +237,7 @@ import {
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { CategoryResponseDto } from './dto/category-response.dto';
-import { Prisma } from 'src/generated/prisma/client';
+import { Prisma } from '@prisma/client';
 import { UpdateCategoryDto } from './dto/update-category-dto';
 import { QueryCategoryDto } from './dto/query-category.dto';
 

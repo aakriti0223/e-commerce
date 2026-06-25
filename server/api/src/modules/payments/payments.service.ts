@@ -6,7 +6,7 @@
 // import { PrismaService } from 'src/prisma/prisma.service';
 // import Stripe from 'stripe';
 // import { CreatePaymentIntentDto } from './dto/create-payment-intent.dto';
-// import { OrderStatus, PaymentStatus, Prisma } from 'src/generated/prisma/client';
+// import { OrderStatus, PaymentStatus, Prisma } from '@prisma/client';
 // import { ConfirmPaymentDto } from './dto/confirm-payment.dto';
 // import { PaymentResponseDto } from './dto/payment-response.dto';
 
@@ -235,11 +235,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import {
-  OrderStatus,
-  PaymentStatus,
-  Prisma,
-} from 'src/generated/prisma/client';
+import { OrderStatus, PaymentStatus, Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import Stripe from 'stripe';
 import { ConfirmPaymentDto } from './dto/confirm-payment.dto';
